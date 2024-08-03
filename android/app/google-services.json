@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "941066464553",
+    "firebase_url": "https://chung-dam-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "chung-dam",
+    "storage_bucket": "chung-dam.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:941066464553:android:de23c619c7a3ba56015b38",
+        "android_client_info": {
+          "package_name": "com.example.chungdam"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "941066464553-ni346mj6ee38vr22bq437001h574pg1j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCnfgYyccbI82Gm8QbVhsha74Oazs5s6Ec"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "941066464553-ni346mj6ee38vr22bq437001h574pg1j.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
