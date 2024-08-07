@@ -77,12 +77,10 @@ class AuthWrapper extends StatelessWidget {
 
               // Extract user data
               final userData = userSnapshot.data!;
-              final name = userData['firstName'] ?? 'No name';
               final phoneNumber = userData['phoneNumber'] ?? snapshot.data!.phoneNumber!;
 
               // Navigate to the HomePage with fetched user data
               return Home(
-                firstName: name,
                 phoneNumber: phoneNumber,
               );
             },

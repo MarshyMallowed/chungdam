@@ -8,20 +8,19 @@ import 'help_center_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Home extends StatefulWidget {
-  final String firstName;
   final String phoneNumber;
 
-  const Home({super.key, required this.firstName, required this.phoneNumber});
+  const Home({super.key, required this.phoneNumber});
   @override
   HomeState createState() => HomeState();
 }
 class HomeState extends State<Home> {
 
-  String? _firstName;
-  String? _lastName;
-  String? _address;
-  String? _email;
-  String? _dateOfBirth;
+  String? firstName;
+  String? lastName;
+  String? address;
+  String? email;
+  String? dateOfBirth;
    @override
   void initState() {
     super.initState();
@@ -41,11 +40,8 @@ Future<void> _fetchUserData() async {
       if (userQuery.docs.isNotEmpty) {
         DocumentSnapshot userData = userQuery.docs.first;
         setState(() {
-        _firstName = userData['firstName'];
-        _lastName = userData['lastName'];
-        _address = userData['address'];
-        _email = userData['email'];
-        _dateOfBirth = userData['dateOfBirth'];
+        firstName = userData['firstName'];
+        lastName = userData['lastName'];
         });
       } else {
         print("No user document found with phone number: $widget.phoneNumber");
@@ -63,11 +59,15 @@ Future<void> _fetchUserData() async {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: HomePage(firstName: _firstName ?? 'No Name', phoneNumber: widget.phoneNumber,),
+      home: HomePage(firstName: firstName ?? 'No Name', phoneNumber: widget.phoneNumber,),
       routes: {
-        '/home': (context) => HomePage(firstName: _firstName ?? 'No Name',
+        '/home': (context) => HomePage(firstName: firstName ?? 'No Name',
                 phoneNumber: widget.phoneNumber,),
-        '/personal_details': (context) => PersonalDetailsPage(phoneNumber:widget.phoneNumber,),
+        '/personal_details': (context) => PersonalDetailsPage(
+          firstName: firstName ?? 'No Name', 
+          lastName: lastName ?? 'No Name', 
+          phoneNumber:widget.phoneNumber,
+          ),
         '/vouchers': (context) => const VouchersPage(),
         '/payment_method': (context) => const PaymentMethodPage(),
         '/language': (context) => const LanguagePage(),

@@ -40,14 +40,13 @@ class _LoginScreenState extends State<LoginScreen> {
         final userSnapshot = await _authService.getUserByIdentifier(identifier);
         if (userSnapshot != null) {
           final userData = userSnapshot;
-          final firstName = userData['firstName'] ?? 'No name';
           final phoneNumber = userData['phoneNumber'] ?? identifier;
            SharedPreferences prefs = await SharedPreferences.getInstance();
             await prefs.setBool('isRegistered', true);
           // Navigate to the HomePage with fetched user data
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (context) => Home( firstName: firstName,phoneNumber: phoneNumber,)),
+            MaterialPageRoute(builder: (context) => Home(phoneNumber: phoneNumber,)),
             (Route<dynamic> route) => false,
           );
         } else {

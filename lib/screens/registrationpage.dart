@@ -71,6 +71,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
       minTextAdapt: true,
       builder: (context, child) {
         return Scaffold(
+          resizeToAvoidBottomInset: true, // Allows the screen to adjust for the keyboard
           body: Stack(
             children: [
               // Background Image
@@ -86,30 +87,28 @@ class _RegistrationPageState extends State<RegistrationPage> {
               ),
               // Content
               SingleChildScrollView(
-                child: Column(
-                  children: [
-                    // Logo and Title
-                    Padding(
-                      padding: EdgeInsets.only(top: 100.0.h), // Adjust top padding for positioning with ScreenUtil
-                      child: Column(
-                        children: [
-                          Image.asset(
-                            'assets/logo.png', // Ensure correct path
-                            height: 300.h, // Adjusted for ScreenUtil
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 110.h), // Adjusted for ScreenUtil
-                    // OTP Verification Card
-                    Padding(
-                      padding: EdgeInsets.symmetric(vertical: 0.0.w), // Adjusted for ScreenUtil
-                      child: Card(
-                        color: const Color(0xFF112244), // Dark blue card color
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(50.0.r), // Adjusted for ScreenUtil
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom), // Adjust for keyboard
+                  child: Column(
+                    children: [
+                      // Logo and Title
+                      Padding(
+                        padding: EdgeInsets.only(top: 100.0.h), // Adjust top padding for positioning with ScreenUtil
+                        child: Image.asset(
+                          'assets/logo.png', // Ensure correct path
+                          height: 300.h, // Adjusted for ScreenUtil
                         ),
-                        elevation: 5,
+                      ),
+                      SizedBox(height:70.0.h),// Expanded OTP Verification Card
+                      Container(
+                        height: MediaQuery.of(context).size.height - 470.0.h, // Adjust the height to fit remaining screen
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF112244), // Dark blue card color
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(50.0.r), // Adjusted for ScreenUtil
+                            topRight: Radius.circular(50.0.r), // Adjusted for ScreenUtil
+                          ),
+                        ),
                         child: Padding(
                           padding: EdgeInsets.all(40.0.w), // Adjusted for ScreenUtil
                           child: Column(
@@ -139,7 +138,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
                               // OTP Input Fields
                               IntlPhoneField(
                                 decoration: InputDecoration(
-                                  labelText: 'Phone Number',
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(16.0.w),
                                   ),
@@ -155,7 +153,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                                   }
                                 },
                               ),
-                              SizedBox(height: 5.h), // Adjusted for ScreenUtil
+                              SizedBox(height: 20.h), // Adjusted for ScreenUtil
                               SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton(
@@ -177,13 +175,13 @@ class _RegistrationPageState extends State<RegistrationPage> {
                                   ),
                                 ),
                               ),
-                              SizedBox(height: 40.h), // Adjusted for ScreenUtil
+                              SizedBox(height: 20.h), // Adjusted for ScreenUtil
                             ],
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],

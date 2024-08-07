@@ -109,6 +109,9 @@ flutter:
     - assets/sashimi/sashimi2.jpg
     - assets/sashimi/sashimi3.jpg
     - assets/sashimi/sashimi4.jpg
+    - assets/hanwooset/seta.png
+    - assets/hanwooset/setb.png
+    - assets/hanwooset/back.png
 fonts:
 - family: Roboto
   fonts: 

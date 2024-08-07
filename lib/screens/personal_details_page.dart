@@ -3,10 +3,19 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PersonalDetailsPage extends StatefulWidget {
   final String phoneNumber;
-  const PersonalDetailsPage({super.key, required this.phoneNumber});
+  final String firstName;
+  final String lastName;
+  const PersonalDetailsPage({super.key, 
+  required this.phoneNumber,
+  required this.firstName,
+  required this.lastName
+  });
   
   @override
   _PersonalDetailsPageState createState() => _PersonalDetailsPageState();
@@ -14,46 +23,144 @@ class PersonalDetailsPage extends StatefulWidget {
 
 class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
   String _dateOfBirth = '2002-10-10';
-  bool isGoogleConnected = false;
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _mobileNumberController = TextEditingController();
-  String? _lastName;
-  String? _firstName;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  bool isGoogleConnected = false;
   @override
   void initState() {
     super.initState();
     _fetchUserData();
     checkGoogleConnection();
   }
-   Future<void> checkGoogleConnection() async {
-  String phoneNumber = widget.phoneNumber;
-  try {
-    // Query the user's document(s) from Firestore where phoneNumber matches
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+
+  Future<bool> isPhoneNumberUnique(String phoneNumber) async {
+    QuerySnapshot query = await FirebaseFirestore.instance
         .collection('users')
         .where('phoneNumber', isEqualTo: phoneNumber)
         .get();
 
-    // Check if the query returned any documents and if 'googleUid' exists
-    if (querySnapshot.docs.isNotEmpty && querySnapshot.docs.first['googleUid'] != null) {
-      setState(() {
-        isGoogleConnected = true;
+    return query.docs.isEmpty; // Returns true if the phone number is not in the database
+  }
+
+  Future<void> _signUpWithGoogle() async {
+  try {
+  // Trigger the Google Sign-In flow
+  final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+  bool isUnique = await isPhoneNumberUnique(widget.phoneNumber);
+  
+  // Obtain the auth details from the request
+  final GoogleSignInAuthentication googleAuth = await googleUser!.authentication;
+
+  // Create a new credential
+  final credential = GoogleAuthProvider.credential(
+    accessToken: googleAuth.accessToken,
+    idToken: googleAuth.idToken,
+  );
+
+  // Sign in with the credential
+  final UserCredential userCredential = await _auth.signInWithCredential(credential);
+  final User? user = userCredential.user;
+
+  if (!isUnique) {
+    // Show dialog to confirm if the user wants to merge existing data
+    bool shouldMerge = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Connecting to Google'),
+          content: const Text(
+              'Do you wish to connect to google account?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop(false); // Return false if cancelled
+              },
+            ),
+            TextButton(
+              child: const Text('Ok'),
+              onPressed: () {
+                Navigator.of(context).pop(true); // Return true if user wants to merge
+              },
+            ),
+          ],
+        );
+      },
+    ) ?? false; // Default to false if the dialog is dismissed
+
+    if (!shouldMerge) {
+      // If the user doesn't want to merge, exit or handle accordingly
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Account merge cancelled.')),
+      );
+      return;
+    }
+  }
+
+  if (user != null) {
+    // Extract first name and last name from Google Display Name
+
+    // Check if the user already exists in Firestore
+    final existingUser = await FirebaseFirestore.instance
+        .collection('users')
+        .where('phoneNumber', isEqualTo: widget.phoneNumber)
+        .get();
+
+    if (existingUser.docs.isNotEmpty) {
+      // User already exists, update the document with Google account details
+      final userDocId = existingUser.docs.first.id;
+      await FirebaseFirestore.instance.collection('users').doc(userDocId).update({
+        'email': user.email,
+        'googleUid': user.uid,
       });
     } else {
+      // New user, create a new document
+      print("New User?");
+    }
+
+    // Store a flag in SharedPreferences
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isRegistered', true);
+    
+    // Navigate to the home screen
+  }
+} catch (e) {
+  print('Error signing up with Google: $e');
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text('Failed to sign up with Google. Please try again.')),
+  );
+}
+}
+  void checkGoogleConnection() async {
+    try {
+      // Query the user's document from Firestore
+      QuerySnapshot userQuery = await FirebaseFirestore.instance
+          .collection('users')
+          .where('phoneNumber', isEqualTo: widget.phoneNumber)
+          .get();
+
+      // Check if 'googleUid' exists in the document
+      if (userQuery.docs.isNotEmpty && userQuery.docs.first['googleUid'] != null) {
+        setState(() {
+          isGoogleConnected = true;
+        });
+      } else {
+        setState(() {
+          isGoogleConnected = false;
+        });
+      }
+    } catch (e) {
+      print('Error checking Google connection: $e');
       setState(() {
         isGoogleConnected = false;
       });
     }
-  } catch (e) {
-    print('Error checking Google connection: $e');
-    setState(() {
-      isGoogleConnected = false;
-    });
   }
-}
 
-
+  
   Future<void> _fetchUserData() async {
     String phoneNumber = widget.phoneNumber;
 
@@ -70,8 +177,6 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
         setState(() {
           _emailController.text = userDoc.get('email') ?? 'No email';
           _addressController.text = userDoc.get('address') ?? 'No address';
-          _firstName= userDoc.get('firstName') ?? 'No First Name';
-          _lastName = userDoc.get('lastName') ?? 'No last name';
           _mobileNumberController.text = userDoc.get('phoneNumber') ?? 'No phone number';
           _dateOfBirth = userDoc.get('dateOfBirth') ?? _dateOfBirth;
         });
@@ -213,13 +318,13 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
               'First Name',
               style: TextStyle(fontSize: 14, color: Colors.grey),
             ),
-            Text(_firstName ?? 'Loading...', style: const TextStyle(fontSize: 18)),
+            Text(widget.firstName, style: const TextStyle(fontSize: 18)),
             const SizedBox(height: 16.0),
             const Text(
               'Last Name',
               style: TextStyle(fontSize: 14, color: Colors.grey),
             ),
-            Text(_lastName ?? 'Loading...', style: const TextStyle(fontSize: 18)),
+            Text(widget.lastName, style: const TextStyle(fontSize: 18)),
             const SizedBox(height: 16.0),
             const Text(
               'Mobile number',
@@ -292,31 +397,20 @@ class _PersonalDetailsPageState extends State<PersonalDetailsPage> {
             const SizedBox(height: 16.0),
             const Text('Connected Accounts', style: TextStyle(fontSize: 18)),
             const SizedBox(height: 16.0),
-            //Row(
-          //children: [
-           // Image.asset('assets/facebook_icon.png', width: 40, height: 40),
-           // const SizedBox(width: 16.0),
-           // const Text('Facebook', style: TextStyle(fontSize: 18)),
-           // const Spacer(),
-            //const Text('Connected', style: TextStyle(fontSize: 16, color: Colors.blue)),
-          //],
-        //),
-      //  const SizedBox(height: 16.0),
-        Row(
-          children: [
-            Image.asset('assets/google_icon.png', width: 40, height: 40),
-            const SizedBox(width: 16.0),
-            const Text('Google', style: TextStyle(fontSize: 18)),
-            const Spacer(),
-            Text(
-              isGoogleConnected ? 'Connected' : 'Not connected',
-              style: TextStyle(
-                fontSize: 16,
-                color: isGoogleConnected ? Colors.blue : Colors.red,
+            GestureDetector(
+              onTap: () {
+                },
+              child: Row(
+                children: [
+                  Image.asset('assets/google_icon.png', width: 40, height: 40),
+                  const SizedBox(width: 16.0),
+                  const Text('Google', style: TextStyle(fontSize: 18)),
+                  const Spacer(),
+                  Text( isGoogleConnected ? 'Connected' : 'Not Connected', style: 
+                    TextStyle(fontSize: 16, color: isGoogleConnected ? Colors.blue : Colors.red)),
+                ],
               ),
             ),
-          ],
-        ),
             const SizedBox(height: 50),
             Center(
               child: TextButton(
