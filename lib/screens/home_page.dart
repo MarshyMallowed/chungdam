@@ -415,50 +415,50 @@ Widget _buildBody(double marginValue, double paddingValue, double borderRadiusVa
       ),
     );
   } else if (_selectedIndex == 2) {
-    // Content for the Restaurant Locations page (when _selectedIndex is 2)
-    return Scaffold(
-      body: Container(
-        color: const Color(0xFFFAF7E8),
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search your location',
-                hintStyle: const TextStyle(color: Color(0xFF172A5A)), // Hint text color
-                prefixIcon: const Icon(Icons.search, color: Color(0xFF172A5A)), // Icon color
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15.0),
-                  borderSide: const BorderSide(color: Color(0xFF172A5A)),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15.0),
-                  borderSide: const BorderSide(color: Color(0xFF172A5A)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15.0),
-                  borderSide: const BorderSide(color: Color(0xFF172A5A)),
+      // Content for the Restaurant Locations page (when _selectedIndex is 2)
+      return Scaffold(
+        body: Container(
+          color: const Color(0xFFFAF7E8),
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search your location',
+                  hintStyle: const TextStyle(color: Color(0xFF172A5A)), // Hint text color
+                  prefixIcon: const Icon(Icons.search, color: Color(0xFF172A5A)), // Icon color
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                    borderSide: const BorderSide(color: Color(0xFF172A5A)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                    borderSide: const BorderSide(color: Color(0xFF172A5A)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                    borderSide: const BorderSide(color: Color(0xFF172A5A)),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-            const Expanded(
-              flex: 2,
-              child: Center(
-                child: Text(
-                  'Find the nearest Chung Dam Restaurant in your area!',
-                  style: TextStyle(
+              const SizedBox(height: 20),
+              const Expanded(
+                flex: 8,
+                child: Center(
+                  child: Text(
+                    'Find the nearest Chung Dam Restaurant in your area!',
+                    style: TextStyle(
                     fontSize: 27,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF172A5A),
-                  ),
+                    ),
                   textAlign: TextAlign.center,
                 ),
               ),
-            ),
-            const SizedBox(height: 5),
-            const Expanded(
+              ),
+              const SizedBox(height: 5),
+              Expanded(
               flex: 8,
               child: SingleChildScrollView(
                 child: Column(
@@ -475,8 +475,8 @@ Widget _buildBody(double marginValue, double paddingValue, double borderRadiusVa
                     ),
                     RestaurantLocation(
                       title: 'BGC',
-                      images: [
-                        'assets/BGC/1b.png',
+                      images: const [
+                        'assets/BGC/1b.webp',
                         'assets/BGC/2b.jpg',
                         'assets/BGC/3b.jpg',
                         'assets/BGC/4b.jpg',
@@ -497,11 +497,11 @@ Widget _buildBody(double marginValue, double paddingValue, double borderRadiusVa
                 ),
               ),
             ),
-          ],
+            ],
+          ),
         ),
-      ),
-    );
-  } else {
+      );
+    }  else {
     // Default content or error handling
     return const Center(
       child: Text('Invalid selection'),
