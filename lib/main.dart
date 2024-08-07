@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
   final bool isRegistered;
 
   const MyApp({super.key, required this.isRegistered});
-
+  
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: isRegistered ? AuthWrapper() : const RegistrationPage(),
+      home: isRegistered ? AuthWrapper() : const RegistrationPage(), //Home(firstName: 'test', phoneNumber:)
     );
   }
 }

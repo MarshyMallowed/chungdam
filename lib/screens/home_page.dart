@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 import 'blank_page.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'logoutFunction.dart';
-import 'package:url_launcher/url_launcher.dart';
-Future<String?> getUserNameFromFirestore(String uid) async {
-  DocumentSnapshot doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
-  return doc.exists ? doc['displayName'] as String? : null;
-}
+import 'package:chungdam/screens/homepage/start.dart';
+import 'package:chungdam/screens/homepage/map.dart';
+
 
 class HomePage extends StatefulWidget {
   final String firstName;
@@ -21,26 +17,48 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
   String _selectedDrawerItem = "";
-  String? _displayName;
-  final TextEditingController _searchController = TextEditingController();
+
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  
+ 
 
-  @override
-  void initState() {
-    super.initState();
-    _fetchDisplayName();
+
+  Future<void> _precacheImages() async {
+    // Precache all the images you use in your HomePage
+     precacheImage(const AssetImage('assets/food4.jpg'), context);
+     precacheImage(const AssetImage('assets/food3.jpg'), context);
+     precacheImage(const AssetImage('assets/food2.jpg'), context);
+     precacheImage(const AssetImage('assets/food5.jpg'), context);
+     precacheImage(const AssetImage('assets/logo1.png'), context);
+     precacheImage(const AssetImage('assets/logo2.png'), context);
+     precacheImage(const AssetImage('assets/Malate/1m.jpg'), context);
+     precacheImage(const AssetImage('assets/Malate/2m.jpg'), context);
+     precacheImage(const AssetImage('assets/Malate/3m.jpg'), context);
+     precacheImage(const AssetImage('assets/Malate/4m.jpg'), context);
+     precacheImage(const AssetImage('assets/BGC/1b.png'), context);
+    precacheImage(const AssetImage('assets/BGC/2b.jpg'), context);
+     precacheImage(const AssetImage('assets/BGC/3b.jpg'), context);
+    precacheImage(const AssetImage('assets/BGC/4b.jpg'), context);
+     precacheImage(const AssetImage('assets/Parqal/1p.jpg'), context);
+    precacheImage(const AssetImage('assets/Parqal/2p.jpg'), context);
+    precacheImage(const AssetImage('assets/Parqal/3p.jpg'), context);
+     precacheImage(const AssetImage('assets/Parqal/4p.png'), context);
+     precacheImage(const AssetImage('assets/aboutlogo.png'), context);
+     precacheImage(const AssetImage('assets/meat/meat1.png'), context);
+     precacheImage(const AssetImage('assets/meat/meat2.png'), context);
+     precacheImage(const AssetImage('assets/meat/meat3.jpg'), context);
+     precacheImage(const AssetImage('assets/meat/meat4.jpg'), context);
+     precacheImage(const AssetImage('assets/crab/crab1.png'), context);
+     precacheImage(const AssetImage('assets/crab/crab2.png'), context);
+     precacheImage(const AssetImage('assets/crab/crab3.png'), context);
+     precacheImage(const AssetImage('assets/crab/crab4.jpg'), context);
+     precacheImage(const AssetImage('assets/sashimi/sashimi3.jpg'), context);
+     precacheImage(const AssetImage('assets/sashimi/sashimi1.jpg'), context);
+     precacheImage(const AssetImage('assets/sashimi/sashimi2.jpg'), context);
+     precacheImage(const AssetImage('assets/sashimi/sashimi4.jpg'), context);
+
+    // ... precache other images
   }
-
-  Future<void> _fetchDisplayName() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      final String? name = await getUserNameFromFirestore(user.uid);
-      setState(() {
-        _displayName = name ?? widget.firstName; // Fall back to the passed name if Firestore data is not available
-      });
-    }
-  }
-
 
   void _onItemTapped(int index) {
     if (index == 3) {
@@ -72,7 +90,7 @@ class HomePageState extends State<HomePage> {
     Color backgroundColor = const Color(0xFFFAF7E8); // Background color for the app
     Color navigationBarColor = const Color(0xFFeeeeee); // Background color for the navigation bars
     Color selectedItemColor = const Color(0xFFeeeeee); // Color for the selected drawer item
-
+    
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: backgroundColor, // Set background color
@@ -203,7 +221,7 @@ class HomePageState extends State<HomePage> {
           ),
           const SizedBox(width: 20),
           Text(
-            'Hi, ${_displayName ?? widget.firstName}',
+            'Hi, ${widget.firstName}',
             style: const TextStyle(
               color: Color(0xFFFAF7E8), // Light yellow color
               fontSize: 30,
@@ -241,266 +259,10 @@ class HomePageState extends State<HomePage> {
 Widget _buildBody(double marginValue, double paddingValue, double borderRadiusValue, Color borderColor, Color thinBorderColor, Color containerBackgroundColor) {
   if (_selectedIndex == 0) {
     // Content for the Home page (when _selectedIndex is 0)
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 25),
-            const Center(
-              child: Column(
-                children: [
-                  Text(
-                    'Welcome to',
-                    style: TextStyle(
-                      fontSize: 23,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                  Text(
-                    'CHUNG DAM!',
-                    style: TextStyle(
-                      fontSize: 40,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFFD4AF37), // Gold color
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
-            Stack(
-              children: [
-                Container(
-                  margin: EdgeInsets.symmetric(horizontal: marginValue, vertical: marginValue),
-                  padding: EdgeInsets.all(paddingValue),
-                  decoration: BoxDecoration(
-                    color: containerBackgroundColor,
-                    borderRadius: BorderRadius.circular(borderRadiusValue),
-                    border: Border.all(color: borderColor, width: 3.0),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 1.0,
-                        offset: Offset(2, 2),
-                      ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(borderRadiusValue),
-                    child: ColorFiltered(
-                      colorFilter: ColorFilter.mode(
-                        const Color(0xFF0c2344).withOpacity(0.3),
-                        BlendMode.srcATop,
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  margin: const EdgeInsets.all(2.0),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    border: Border.all(color: thinBorderColor, width: 1.0),
-                                    image: const DecorationImage(
-                                      image: AssetImage('assets/food4.jpg'),
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                  height: 250,
-                                ),
-                              ),
-                              Expanded(
-                                child: Column(
-                                  children: [
-                                    Container(
-                                      margin: const EdgeInsets.all(3.0),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10.0),
-                                        border: Border.all(color: thinBorderColor, width: 1.0),
-                                        image: const DecorationImage(
-                                          image: AssetImage('assets/food3.jpg'),
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                      height: 100,
-                                    ),
-                                    Container(
-                                      margin: const EdgeInsets.all(2.0),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10.0),
-                                        border: Border.all(color: thinBorderColor, width: 1.0),
-                                        image: const DecorationImage(
-                                          image: AssetImage('assets/food2.jpg'),
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                      height: 145,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          Container(
-                            margin: const EdgeInsets.all(2.0),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10.0),
-                              border: Border.all(color: thinBorderColor, width: 1.0),
-                              image: const DecorationImage(
-                                image: AssetImage('assets/food5.jpg'),
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                            height: 100,
-                            width: double.infinity,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  bottom: 30.0,
-                  right: 30.0,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // Order Now Logic
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFfff6cd),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(50),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 25.0,
-                        vertical: 5.0,
-                      ),
-                      elevation: 5,
-                    ),
-                    child: const Text(
-                      'ORDER NOW!',
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 15),
-            Align(
-              alignment: Alignment.center,
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.8,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(borderRadiusValue),
-                  child: Image.asset(
-                    'assets/food5.jpg',
-                    fit: BoxFit.cover,
-                    height: 200,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 50),
-          ],
-        ),
-      ),
-    );
+    return StartPage(marginValue: marginValue, paddingValue: paddingValue, borderColor: borderColor, borderRadiusValue: borderRadiusValue, thinBorderColor: thinBorderColor, containerBackgroundColor: containerBackgroundColor,);
   } else if (_selectedIndex == 2) {
       // Content for the Restaurant Locations page (when _selectedIndex is 2)
-      return Scaffold(
-        body: Container(
-          color: const Color(0xFFFAF7E8),
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: 'Search your location',
-                  hintStyle: const TextStyle(color: Color(0xFF172A5A)), // Hint text color
-                  prefixIcon: const Icon(Icons.search, color: Color(0xFF172A5A)), // Icon color
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15.0),
-                    borderSide: const BorderSide(color: Color(0xFF172A5A)),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15.0),
-                    borderSide: const BorderSide(color: Color(0xFF172A5A)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15.0),
-                    borderSide: const BorderSide(color: Color(0xFF172A5A)),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              const Expanded(
-                flex: 8,
-                child: Center(
-                  child: Text(
-                    'Find the nearest Chung Dam Restaurant in your area!',
-                    style: TextStyle(
-                    fontSize: 27,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF172A5A),
-                    ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              ),
-              const SizedBox(height: 5),
-              Expanded(
-              flex: 8,
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    RestaurantLocation(
-                      title: 'MALATE',
-                      images: [
-                        'assets/Malate/1m.jpg',
-                        'assets/Malate/2m.jpg',
-                        'assets/Malate/3m.jpg',
-                        'assets/Malate/4m.jpg'
-                      ],
-                      mapUrl: 'https://maps.app.goo.gl/UhWveKZ9NPYHp7pNA',
-                    ),
-                    RestaurantLocation(
-                      title: 'BGC',
-                      images: const [
-                        'assets/BGC/1b.webp',
-                        'assets/BGC/2b.jpg',
-                        'assets/BGC/3b.jpg',
-                        'assets/BGC/4b.jpg',
-                      ],
-                      mapUrl: 'https://maps.app.goo.gl/dSp6D5yQyd5iekZk8',
-                    ),
-                    RestaurantLocation(
-                      title: 'PARQAL',
-                      images: [
-                        'assets/Parqal/1p.jpg',
-                        'assets/Parqal/2p.jpg',
-                        'assets/Parqal/3p.jpg',
-                        'assets/Parqal/4p.png'
-                      ],
-                      mapUrl: 'https://maps.app.goo.gl/uGy5cXjkLhVNtePk7',
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            ],
-          ),
-        ),
-      );
+      return Map();
     }  else {
     // Default content or error handling
     return const Center(
@@ -537,132 +299,6 @@ Widget _buildBody(double marginValue, double paddingValue, double borderRadiusVa
     );
   }
 }
-
-
-class RestaurantLocation extends StatefulWidget {
-  final String title;
-  final List<String> images;
-  final String mapUrl;
-
-  const RestaurantLocation({super.key, 
-    required this.title,
-    required this.images,
-    required this.mapUrl,
-  });
-
-  @override
-  // ignore: library_private_types_in_public_api
-  _RestaurantLocationState createState() => _RestaurantLocationState();
-}
-
-class _RestaurantLocationState extends State<RestaurantLocation>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 1),
-    );
-    _scaleAnimation = Tween<double>(begin: 0.9, end: 1.0).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOut,
-    ));
-
-    // Start the animation when the widget is built
-    _controller.forward();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _launchURL(String url) async {
-    final Uri uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      throw 'Could not launch $url';
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 20),
-      color: const Color(0xFFE0E0E0),
-      child: Column(
-        children: [
-          Stack(
-            children: [
-              AnimatedBuilder(
-                animation: _scaleAnimation,
-                builder: (context, child) {
-                  return Transform.scale(
-                    scale: _scaleAnimation.value,
-                    child: GridView.builder(
-                      padding: const EdgeInsets.all(4.0),
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        childAspectRatio: 1.5,
-                        crossAxisSpacing: 4.0,
-                        mainAxisSpacing: 4.0,
-                      ),
-                      itemCount: widget.images.length,
-                      itemBuilder: (context, index) {
-                        return Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(color: const Color(0xFFeeeeee), width: 2.0),
-                            borderRadius: BorderRadius.circular(15.0),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(15.0),
-                            child: Image.asset(widget.images[index], fit: BoxFit.cover),
-                          ),
-                        );
-                      },
-                    ),
-                  );
-                },
-              ),
-              Positioned(
-                bottom: 10,
-                right: 10,
-                child: ElevatedButton.icon(
-                  onPressed: () => _launchURL(widget.mapUrl),
-                  icon: const Icon(Icons.location_on, color: Colors.red),
-                  label: Text(
-                    widget.title,
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFF9F0D9),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: const BorderSide(color: Colors.black, width: 1),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
 

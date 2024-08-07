@@ -17,7 +17,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _identifierController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final AuthService _authService = AuthService();
-
+ 
   @override
   void dispose() {
     _identifierController.dispose();
@@ -45,14 +45,10 @@ class _LoginScreenState extends State<LoginScreen> {
            SharedPreferences prefs = await SharedPreferences.getInstance();
             await prefs.setBool('isRegistered', true);
           // Navigate to the HomePage with fetched user data
-          Navigator.pushReplacement(
+          Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(
-              builder: (context) => Home(
-                firstName: firstName,
-                phoneNumber: phoneNumber,
-              ),
-            ),
+            MaterialPageRoute(builder: (context) => Home( firstName: firstName,phoneNumber: phoneNumber,)),
+            (Route<dynamic> route) => false,
           );
         } else {
           // Handle case where user data is not found
@@ -75,7 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Login'),
+        title: Text('Login'),
       ),
       body: Stack(
         children: [

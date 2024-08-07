@@ -1,11 +1,11 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:chungdam/screens/login.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'home.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'home.dart';
+import 'login.dart';
 
 class SignUpScreen extends StatefulWidget {
   final String phoneNumber;
@@ -13,7 +13,6 @@ class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key, required this.phoneNumber, required this.phoneCNumber});
 
   @override
-  // ignore: library_private_types_in_public_api
   _SignUpScreen createState() => _SignUpScreen();
 }
 
@@ -21,71 +20,92 @@ class _SignUpScreen extends State<SignUpScreen> {
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _passwordController = TextEditingController();
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-Future<bool> isPhoneNumberUnique(String phoneNumber) async {
-    QuerySnapshot query = await FirebaseFirestore.instance
-        .collection('users')
-        .where('phoneNumber', isEqualTo: phoneNumber)
-        .get();
+  Future<void> _signUpWithGoogle() async {
+  try {
+    // Trigger the Google Sign-In flow
+    final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
-    return query.docs.isEmpty; // Returns true if the phone number is not in the database
-  }
-    Future<void> _submitData() async {
-    final firstName = _firstNameController.text;
-    final lastName = _lastNameController.text;
-    final name = '$firstName $lastName';
-    final password = _passwordController.text;
+    // Obtain the auth details from the request
+    final GoogleSignInAuthentication googleAuth = await googleUser!.authentication;
 
-    try {
-      // Check if the phone number is unique
-      bool isUnique = await isPhoneNumberUnique(widget.phoneNumber);
+    // Create a new credential
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
 
-      if (!isUnique) {
-        // Phone number is already registered
-        // ignore: use_build_context_synchronously
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('This phone number is already registered.')),
-        );
-        return;
+    // Sign in with the credential
+    final UserCredential userCredential = await _auth.signInWithCredential(credential);
+    final User? user = userCredential.user;
+
+    if (user != null) {
+      // Extract first name and last name from Google Display Name
+      String? googleDisplayName = user.displayName;
+      String? firstName;
+      String? lastName;
+
+      if (googleDisplayName != null) {
+        List<String> nameParts = googleDisplayName.split(' ');
+        firstName = nameParts.first;
+        lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
       }
 
-      // Proceed to store user data if the phone number is unique
-      await FirebaseFirestore.instance.collection('users').add({
-        'firstName': firstName,
-        'lastName': lastName,
-        'name': name,
-        'password': password,
-        'phoneNumber': widget.phoneNumber,
-        'completeNumber': widget.phoneCNumber,
-        'createdAt': Timestamp.now(), // Optional: Store the time of creation
-      });
+      // Check if the user already exists in Firestore
+      final existingUser = await FirebaseFirestore.instance
+          .collection('users')
+          .where('phoneNumber', isEqualTo: widget.phoneNumber)
+          .get();
+
+      if (existingUser.docs.isNotEmpty) {
+        // User already exists, update the document with Google account details
+        final userDocId = existingUser.docs.first.id;
+        await FirebaseFirestore.instance.collection('users').doc(userDocId).update({
+          'email': user.email,
+          'googleUid': user.uid,
+          'googleDisplayName': googleDisplayName,
+          'firstName': firstName,
+          'lastName': lastName,
+          'name': googleDisplayName,
+        });
+      } else {
+        // New user, create a new document
+        await FirebaseFirestore.instance.collection('users').add({
+          'firstName': firstName,
+          'lastName': lastName,
+          'name': googleDisplayName,
+          'password': _passwordController.text, // This might not be necessary if using Google sign-in
+          'phoneNumber': widget.phoneNumber,
+          'completeNumber': widget.phoneCNumber,
+          'createdAt': Timestamp.now(),
+          'email': user.email,
+          'googleUid': user.uid,
+          'googleDisplayName': googleDisplayName,
+        });
+      }
+
+      // Store a flag in SharedPreferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setBool('isRegistered', true);
-      if (kDebugMode) {
-        print('User data stored successfully');
-      }
-      Navigator.push(
-            
-        // ignore: use_build_context_synchronously
+      
+      // Navigate to the home screen
+      Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(
-          builder: (context) => Home(
-            firstName: firstName,
-            phoneNumber: widget.phoneNumber,
-          ),
-        ),
+        MaterialPageRoute(builder: (context) => Home(firstName: firstName ?? '', phoneNumber: widget.phoneNumber)),
+        (Route<dynamic> route) => false,
       );
-    } catch (e) {
-      if (kDebugMode) {
-        print('Failed to store user data: $e');
-      }
-      if (context.mounted) { // Check if the widget is still mounted
-        ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to create account. Please try again.')),
-        );
-      }
     }
+  } catch (e) {
+    print('Error signing up with Google: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Failed to sign up with Google. Please try again.')),
+    );
   }
+}
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -107,7 +127,7 @@ Future<bool> isPhoneNumberUnique(String phoneNumber) async {
                 'assets/logo.png',
                 height: 300,
               ),
-              const SizedBox(height: 20), // Adjust height to position content correctly
+              const SizedBox(height: 20),
               const Text(
                 'Sign Up',
                 style: TextStyle(
@@ -129,11 +149,7 @@ Future<bool> isPhoneNumberUnique(String phoneNumber) async {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   GestureDetector(
-                    onTap: () {
-                      if (kDebugMode) {
-                        print("Google icon tapped");
-                      }
-                    },
+                    onTap: _signUpWithGoogle,
                     child: Image.asset(
                       'assets/google_icon.png',
                       height: 30,
@@ -143,15 +159,13 @@ Future<bool> isPhoneNumberUnique(String phoneNumber) async {
                   const SizedBox(width: 10),
                   GestureDetector(
                     onTap: () {
-                      if (kDebugMode) {
-                        print('Facebook icon tapped');
-                      }
+                      // Facebook sign-up logic
                     },
                     child: Image.asset(
                       'assets/facebook_icon.png',
                       height: 30,
-                      width:30,
-                    )
+                      width: 30,
+                    ),
                   ),
                 ],
               ),
@@ -174,7 +188,7 @@ Future<bool> isPhoneNumberUnique(String phoneNumber) async {
                       ),
                     ),
                     Expanded(
-                      child: Divider (
+                      child: Divider(
                         thickness: 1,
                         color: Colors.grey,
                       ),
@@ -239,8 +253,9 @@ Future<bool> isPhoneNumberUnique(String phoneNumber) async {
               ),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: 
-                  _submitData,
+                onPressed: () {
+                  // Regular sign-up logic
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.yellow,
                   padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 10),
@@ -248,9 +263,9 @@ Future<bool> isPhoneNumberUnique(String phoneNumber) async {
                 child: const Text(
                   'Create Account',
                   style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
@@ -274,14 +289,14 @@ Future<bool> isPhoneNumberUnique(String phoneNumber) async {
                       ),
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const LoginScreen()),
-                        );
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const LoginScreen()),
+                          );
                         },
                     ),
                   ],
-                )
+                ),
               )
             ],
           ),
