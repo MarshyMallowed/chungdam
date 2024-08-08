@@ -1,8 +1,8 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'signup.dart';
+import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 
 class OTPVerificationPage extends StatefulWidget {
   final String verificationId;
@@ -22,24 +22,18 @@ class OTPVerificationPage extends StatefulWidget {
 }
 
 class _OTPVerificationPageState extends State<OTPVerificationPage> {
-  final List<TextEditingController> _otpControllers =
-  List.generate(6, (_) => TextEditingController());
-  final List<FocusNode> _focusNodes =
-  List.generate(6, (_) => FocusNode());
+  String pin = ''; 
 
   Future<void> _verifyOTP() async {
-    final otp = _otpControllers.map((controller) => controller.text).join();
+    final otp = pin;
+    print(otp);
     final credential = PhoneAuthProvider.credential(
       verificationId: widget.verificationId,
       smsCode: otp,
     );
 
     try {
-      await FirebaseAuth.instance.signInWithCredential(credential);
-      if (kDebugMode) {
-        print('Successfully Registered');
-      }
-      Navigator.push(
+      await FirebaseAuth.instance.signInWithCredential(credential);      Navigator.push(
         // ignore: use_build_context_synchronously
         context,
         MaterialPageRoute(
@@ -50,17 +44,19 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
         ),
       );
     } catch (e) {
-      if (kDebugMode) {
-        print('Failed Register, please check your OTP');
-      }
-      // Show an error message to the user
-    }
+  // Show an error message to the user using a Snackbar
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text('An error occurred: $e'),
+      backgroundColor: Colors.red, // Optional: Set the background color
+      duration: Duration(seconds: 3), // Optional: Set how long the Snackbar should be visible
+    ),
+  );
+}
   }
 
   @override
   void dispose() {
-    _otpControllers.forEach((controller) => controller.dispose());
-    _focusNodes.forEach((node) => node.dispose());
     super.dispose();
   }
 
@@ -132,63 +128,24 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
                     ),
                     SizedBox(height: 50.h), // Added SizedBox below Enter OTP
                     // OTP Input Fields
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: List.generate(6, (index) {
-                        return Expanded(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 5.w),
-                            child: TextField(
-                              controller: _otpControllers[index],
-                              focusNode: _focusNodes[index],
-                              keyboardType: TextInputType.number,
-                              textAlign: TextAlign.center,
-                              maxLength: 1,
-                              decoration: InputDecoration(
-                                counterText: '',
-                                filled: true,
-                                fillColor: const Color(
-                                    0xFF112244), // Match background color for underlines
-                                enabledBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: const Color(0xFFFAF7E8),
-                                      width: 2.0), // Underline color and thickness
-                                ),
-                                focusedBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: const Color(
-                                          0xFFFFD700), // Focused underline color
-                                      width: 2.0),
-                                ),
-                                contentPadding: EdgeInsets.symmetric(
-                                    vertical: 10.h, horizontal: 10.w),
-                              ),
-                              style: TextStyle(
+                    OtpTextField(
+                      numberOfFields: 6,
+                      borderColor: const Color(0xFFFFD700),
+                      focusedBorderColor: const Color(0xFFFFD700),
+                      showFieldAsBox: false,
+                      borderWidth: 2.0,
+                      cursorColor:Color(0xFFFFD700),
+                      textStyle:TextStyle(
                                 fontSize: 24.sp, // Adjusted for ScreenUtil
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white, // Ensures text is visible
                               ),
-                              onChanged: (value) {
-                                if (value.length == 1 && index < 5) {
-                                  FocusScope.of(context).nextFocus();
-                                }
-                              },
-                              onSubmitted: (_) {
-                                if (_otpControllers[index].text.isEmpty &&
-                                    index > 0) {
-                                  FocusScope.of(context).previousFocus();
-                                }
-                              },
-                              onEditingComplete: () {
-                                if (_otpControllers[index].text.isEmpty &&
-                                    index > 0) {
-                                  FocusScope.of(context).previousFocus();
-                                }
-                              },
-                            ),
-                          ),
-                        );
-                      }),
+                      //runs when a code is typed in                     //runs when every textfield is filled 
+                      onSubmit: (String verificationCode) {
+                        setState(() {
+                          pin = verificationCode; 
+                          });// Store the full OTP
+                      },   
                     ),
                     TextButton(
                       onPressed: () {
