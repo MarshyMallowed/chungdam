@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 
 
 class HanwooAlaCartePage extends StatelessWidget {
-  final int index;
 
-  HanwooAlaCartePage(this.index);
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +11,7 @@ class HanwooAlaCartePage extends StatelessWidget {
         title: const Text('HANWOO ALA CARTE'),
       ),
       body: Center(
-        child: Text('Details Page $index'),
+        
       ),
     );
   }

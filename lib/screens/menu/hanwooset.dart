@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
 class HanwooSetPage extends StatefulWidget {
-  final int index;
-  HanwooSetPage(this.index);
+
 
   @override
   _HanwooSetPageState createState() => _HanwooSetPageState();
@@ -24,6 +23,10 @@ class _HanwooSetPageState extends State<HanwooSetPage> {
     });
   }
 
+  void _addToCart(String itemId) {
+    // Logic to add the item to the cart
+    print('Added item $itemId to cart');
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,9 +60,9 @@ class _HanwooSetPageState extends State<HanwooSetPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start, // Adjust content to start of column
             children: [
-              _buildImageWithButton('assets/hanwooset/seta.png', 'assets/hanwooset/back.png', isFront, _toggleFirstImage),
+              _buildImageWithButton('assets/hanwooset/seta.png', 'assets/hanwooset/back.png', isFront, _toggleFirstImage,'setA',),
               SizedBox(height: 0), // Spacing between the two images
-              _buildImageWithButton('assets/hanwooset/setb.png', 'assets/hanwooset/back.png', isSecondFront, _toggleSecondImage),
+              _buildImageWithButton('assets/hanwooset/setb.png', 'assets/hanwooset/back.png', isSecondFront, _toggleSecondImage,'setB'),
             ],
           ),
         ),
@@ -67,7 +70,7 @@ class _HanwooSetPageState extends State<HanwooSetPage> {
     );
   }
 
-  Widget _buildImageWithButton(String imagePathFront, String imagePathBack, bool isFront, VoidCallback toggleImage) {
+  Widget _buildImageWithButton(String imagePathFront, String imagePathBack, bool isFront, VoidCallback toggleImage, String itemId) {
     return Stack(
       alignment: Alignment.topLeft,
       children: <Widget>[
@@ -100,9 +103,10 @@ class _HanwooSetPageState extends State<HanwooSetPage> {
           left: 1,
           top: 5,
           child: FloatingActionButton(
+            heroTag: itemId,
             onPressed: () {
-              // Additional action for the button press
-              print('Addition button tapped');
+              _addToCart(itemId);
+              print('Item $itemId is added to cart');
             },
             child: Icon(Icons.add, color: Color(0xFFFAF7E8)), // Icon color
             backgroundColor: Color(0xFF0C2344), // Button background color

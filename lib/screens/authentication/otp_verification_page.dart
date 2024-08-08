@@ -26,7 +26,6 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
 
   Future<void> _verifyOTP() async {
     final otp = pin;
-    print(otp);
     final credential = PhoneAuthProvider.credential(
       verificationId: widget.verificationId,
       smsCode: otp,
@@ -46,13 +45,14 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
       );
     } catch (e) {
   // Show an error message to the user using a Snackbar
+  // ignore: use_build_context_synchronously
   ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
+    const SnackBar(
       content: Text('An error occurred: Invalid OTP Code',
-        style: const TextStyle(color: Colors.black )
+        style: TextStyle(color: Colors.black )
       ),
-      backgroundColor: const Color.fromARGB(255, 250, 160, 160), // Optional: Set the background color
-      duration: const Duration(seconds: 4), // Optional: Set how long the Snackbar should be visible
+      backgroundColor: Color.fromARGB(255, 250, 160, 160), // Optional: Set the background color
+      duration: Duration(seconds: 4), // Optional: Set how long the Snackbar should be visible
     ),
     snackBarAnimationStyle: AnimationStyle(duration: const Duration(milliseconds: 1000))
   );
@@ -138,7 +138,7 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
                       focusedBorderColor: const Color(0xFFFFD700),
                       showFieldAsBox: false,
                       borderWidth: 2.0,
-                      cursorColor:Color(0xFFFFD700),
+                      cursorColor:const Color(0xFFFFD700),
                       textStyle:TextStyle(
                                 fontSize: 24.sp, // Adjusted for ScreenUtil
                                 fontWeight: FontWeight.bold,

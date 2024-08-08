@@ -3,7 +3,7 @@ import 'package:chungdam/screens/menu/menupage.dart';
 import 'package:chungdam/screens/menu/hanwooset.dart';
 import 'package:chungdam/screens/menu/hanwooalacarte.dart';
 class MenuPage extends StatefulWidget {
-  const MenuPage({Key? key}) : super(key: key);
+  const MenuPage({super.key});
 
   @override
   MenuPageState createState() => MenuPageState();
@@ -19,13 +19,13 @@ class MenuItem {
   Widget getPage() {
     switch (index) {
       case 1:
-        return HanwooSetPage(index);
+        return HanwooSetPage();
       case 2:
-        return HanwooAlaCartePage(index);
+        return HanwooAlaCartePage();
       case 3:
-        return WagyuSetPage(index);
+        return WagyuSetPage();
       case 4:
-        return SamgyeopsalPage(index);
+        return SamgyeopsalPage();
       default:
         return ErrorPage();  // Create an ErrorPage or a default page to handle unexpected cases
     }
@@ -50,19 +50,19 @@ class MenuPageState extends State<MenuPage> {
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
-          color: Color(0xFFFAF7E8),
+          color: const Color(0xFFFAF7E8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              SizedBox(height: 40),
-              Center(child: Text("메뉴", style: TextStyle(fontSize: 33,
+              const SizedBox(height: 40),
+              const Center(child: Text("메뉴", style: TextStyle(fontSize: 33,
                   fontWeight: FontWeight.bold,
                   color: Colors.black), textAlign: TextAlign.center)),
-              Center(child: Text("MENU", style: TextStyle(fontSize: 33,
+              const Center(child: Text("MENU", style: TextStyle(fontSize: 33,
                   fontWeight: FontWeight.bold,
                   color: Colors.black), textAlign: TextAlign.center)),
-              SizedBox(height: 15),
-              ...menuItems.map((item) => buildMenuItem(context, item)).toList(),
+              const SizedBox(height: 15),
+              ...menuItems.map((item) => buildMenuItem(context, item)),
             ],
           ),
         ),
@@ -85,10 +85,10 @@ class MenuPageState extends State<MenuPage> {
                   color: Colors.black.withOpacity(0.1),
                   spreadRadius: 0.5,  // Reduced spread radius
                   blurRadius: 3,  // Reduced blur radius
-                  offset: Offset(0, 2),  // Reduced offset
+                  offset: const Offset(0, 2),  // Reduced offset
                 ),
               ],
-              border: Border.all(color: Color(0xFF0c2344), width: 1.5),  // Slightly thinner border
+              border: Border.all(color: const Color(0xFF0c2344), width: 1.5),  // Slightly thinner border
               borderRadius: BorderRadius.circular(15),  // Smaller border radius
             ),
             child: Column(
@@ -97,7 +97,7 @@ class MenuPageState extends State<MenuPage> {
                 Padding(
                   padding: const EdgeInsets.all(8),  // Reduced padding
                   child: ClipRRect(
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(8)),  // Smaller radius for the image
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),  // Smaller radius for the image
                     child: AspectRatio(
                       aspectRatio: 16 / 9,
                       child: Image.asset(item.imagePath, fit: BoxFit.cover),
@@ -106,17 +106,22 @@ class MenuPageState extends State<MenuPage> {
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFD4AF37),
-                    minimumSize: Size(double.infinity, 40),  // Reduced button height
+                    backgroundColor: const Color(0xFFD4AF37),
+                    minimumSize: const Size(double.infinity, 40),  // Reduced button height
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    padding: EdgeInsets.symmetric(vertical: 8),  // Reduced padding
+                    padding: const EdgeInsets.symmetric(vertical: 8),  // Reduced padding
                   ),
-                  onPressed: () => Navigator.push(context,
+                  onPressed: () {
+                    print("Navigating to page");
+                    Navigator.push(
+                      context,
                       MaterialPageRoute(builder: (context) => item.getPage()),
-                  ),
+                    );
+                    print("Navigation completed");
+                  },
                   child: Text(
                     item.name,
-                    style: TextStyle(fontSize: 20, color: Color(0xFF0c2344), fontWeight: FontWeight.bold),  // Smaller font size
+                    style: const TextStyle(fontSize: 20, color: Color(0xFF0c2344), fontWeight: FontWeight.bold),  // Smaller font size
                   ),
                 ),
               ],

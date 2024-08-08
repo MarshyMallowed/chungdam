@@ -6,9 +6,8 @@ import 'package:flutter/material.dart';
 
 
 class WagyuSetPage extends StatelessWidget {
-  final int index;
 
-  WagyuSetPage(this.index);
+
 
   @override
   Widget build(BuildContext context) {
@@ -17,16 +16,14 @@ class WagyuSetPage extends StatelessWidget {
         title: const Text('WAGYU SET'),
       ),
       body: Center(
-        child: Text('Details Page $index'),
+        child: Text('Details Page 3'),
       ),
     );
   }
 }
 
 class SamgyeopsalPage extends StatelessWidget {
-  final int index;
 
-  SamgyeopsalPage(this.index);
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +32,7 @@ class SamgyeopsalPage extends StatelessWidget {
         title: const Text('SAMGYEOPSAL'),
       ),
       body: Center(
-        child: Text('Details Page $index'),
+        child: Text('Details Page 4'),
       ),
     );
   }

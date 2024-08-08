@@ -90,13 +90,13 @@ class HomePageState extends State<HomePage> {
     Color backgroundColor = const Color(0xFFFAF7E8); // Background color for the app
     Color navigationBarColor = const Color(0xFFeeeeee); // Background color for the navigation bars
     Color selectedItemColor = const Color(0xFFeeeeee); // Color for the selected drawer item
-    
+
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: backgroundColor, // Set background color
       appBar: AppBar(
         backgroundColor: const Color(0xFF0c2344), // Dark blue color for AppBar
-        title: _selectedIndex == 2
+        title: _selectedIndex == 1
         ? const Text(
           "CHUNG DAM",
           style: TextStyle(
@@ -105,7 +105,7 @@ class HomePageState extends State<HomePage> {
             fontWeight: FontWeight.bold,
           ),
         )
-        : SizedBox.shrink(), // Returns an empty widget
+        : const SizedBox.shrink(), // Returns an empty widget
         leading: Builder(
           builder: (context) => IconButton(
             icon: const Icon(Icons.menu, color: Color(0xFFFAF7E8)),
@@ -191,6 +191,7 @@ class HomePageState extends State<HomePage> {
     );
   }
 
+
   Drawer _buildDrawer(Color selectedItemColor) {
     return Drawer(
       child: Column(
@@ -271,7 +272,7 @@ Widget _buildBody(double marginValue, double paddingValue, double borderRadiusVa
     // Content for the Home page (when _selectedIndex is 0)
     return StartPage(marginValue: marginValue, paddingValue: paddingValue, borderColor: borderColor, borderRadiusValue: borderRadiusValue, thinBorderColor: thinBorderColor, containerBackgroundColor: containerBackgroundColor,);
   } else if (_selectedIndex == 1){
-      return MenuPage();
+      return const MenuPage();
   } else if (_selectedIndex == 2) {
       // Content for the Restaurant Locations page (when _selectedIndex is 2)
       return Map();
@@ -305,6 +306,7 @@ Widget _buildBody(double marginValue, double paddingValue, double borderRadiusVa
         ),
       ],
       currentIndex: _selectedIndex,
+
       selectedItemColor: const Color(0xFFBC9C22), // Gold color for selected item
       unselectedItemColor: const Color(0xFF051D40), // Dark blue color for unselected items
       onTap: _onItemTapped,

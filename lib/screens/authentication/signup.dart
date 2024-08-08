@@ -23,6 +23,48 @@ class _SignUpScreen extends State<SignUpScreen> {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  Future<String> _showCreatePasswordDialog() async {
+    String password = '';
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Create a Password'),
+          content: TextField(
+            controller: _passwordController,
+            obscureText: true,
+            decoration: InputDecoration(
+              labelText: 'Password',
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
+              },
+            ),
+            TextButton(
+              child: Text('Create'),
+              onPressed: () {
+                if (_passwordController.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Please enter a password.')),
+                  );
+                } else {
+                  password = _passwordController.text;
+                  Navigator.of(context).pop(); // Close dialog
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+
+    return password;
+  }
   Future<bool> isPhoneNumberUnique(String phoneNumber) async {
     QuerySnapshot query = await FirebaseFirestore.instance
         .collection('users')
@@ -114,19 +156,30 @@ class _SignUpScreen extends State<SignUpScreen> {
         'googleDisplayName': googleDisplayName,
       });
     } else {
-      // New user, create a new document
-      await FirebaseFirestore.instance.collection('users').add({
-        'firstName': firstName,
-        'lastName': lastName,
-        'name': googleDisplayName,
-        'password': _passwordController.text, // This might not be necessary if using Google sign-in
-        'phoneNumber': widget.phoneNumber,
-        'completeNumber': widget.phoneCNumber,
-        'createdAt': Timestamp.now(),
-        'email': user.email,
-        'googleUid': user.uid,
-        'googleDisplayName': googleDisplayName,
-      });
+        String password = await _showCreatePasswordDialog();
+
+        if (password.isNotEmpty) {
+          await FirebaseFirestore.instance.collection('users').add({
+            'firstName': firstName,
+            'lastName': lastName,
+            'name': googleDisplayName,
+            'phoneNumber': widget.phoneNumber,
+            'password': password,
+            'createdAt': Timestamp.now(),
+            'email': user.email,
+            'googleUid': user.uid,
+            'googleDisplayName': googleDisplayName,
+            'completeNumber': widget.phoneCNumber,
+          });
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('User created successfully!')),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Password creation cancelled.')),
+          );
+        }
     }
 
     // Store a flag in SharedPreferences

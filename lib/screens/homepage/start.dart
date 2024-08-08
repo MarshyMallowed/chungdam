@@ -23,8 +23,11 @@ class StartPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Padding(
+    return Scaffold(
+    
+    body: SingleChildScrollView(
+      child: Container(
+        color: const Color(0xFFFAF7E8),
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,6 +198,7 @@ class StartPage extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }

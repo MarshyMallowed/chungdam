@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void logoutAndNavigateToLogin(BuildContext context) async {
+  // ignore: unused_local_variable
   SharedPreferences prefs = await SharedPreferences.getInstance();
   await FirebaseAuth.instance.signOut();
 
