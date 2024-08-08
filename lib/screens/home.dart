@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'home_page.dart';
-import 'personal_details_page.dart';
-import 'vouchers.dart';
-import 'payment_method_page.dart';
-import 'language_page.dart';
-import 'help_center_page.dart';
+import 'package:chungdam/screens/navbot/home_page.dart';
+import 'package:chungdam/screens/drawerleft/personal_details_page.dart';
+import 'package:chungdam/screens/drawerleft/help_center_page.dart';
+import 'package:chungdam/screens/drawerleft/language_page.dart';
+import 'package:chungdam/screens/drawerleft/payment_method_page.dart';
+import 'package:chungdam/screens/drawerleft/vouchers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Home extends StatefulWidget {

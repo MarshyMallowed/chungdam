@@ -18,7 +18,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
   String phoneNumber = '';
   String verificationId = '';
   String phoneCNumber = '';
-
+  
   Future<void> _sendOTP() async {
     try {
       await _auth.verifyPhoneNumber(
@@ -63,7 +63,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
       }
     }
   }
-
+  
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(

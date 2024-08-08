@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'blank_page.dart';
-import 'logoutFunction.dart';
+import 'package:chungdam/screens/logoutfunction.dart';
 import 'package:chungdam/screens/homepage/start.dart';
 import 'package:chungdam/screens/homepage/map.dart';
-import 'package:chungdam/screens/menu_page.dart';
+import 'package:chungdam/screens/navbot/menu_page.dart';
+import 'package:chungdam/screens/blank_page.dart';
 
 class HomePage extends StatefulWidget {
   final String firstName;

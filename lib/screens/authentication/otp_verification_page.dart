@@ -33,7 +33,8 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
     );
 
     try {
-      await FirebaseAuth.instance.signInWithCredential(credential);      Navigator.push(
+      await FirebaseAuth.instance.signInWithCredential(credential);      
+      Navigator.push(
         // ignore: use_build_context_synchronously
         context,
         MaterialPageRoute(
@@ -47,10 +48,13 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
   // Show an error message to the user using a Snackbar
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
-      content: Text('An error occurred: $e'),
-      backgroundColor: Colors.red, // Optional: Set the background color
-      duration: Duration(seconds: 3), // Optional: Set how long the Snackbar should be visible
+      content: Text('An error occurred: Invalid OTP Code',
+        style: const TextStyle(color: Colors.black )
+      ),
+      backgroundColor: const Color.fromARGB(255, 250, 160, 160), // Optional: Set the background color
+      duration: const Duration(seconds: 4), // Optional: Set how long the Snackbar should be visible
     ),
+    snackBarAnimationStyle: AnimationStyle(duration: const Duration(milliseconds: 1000))
   );
 }
   }

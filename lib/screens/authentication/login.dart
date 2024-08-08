@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'login_authservice.dart'; // Ensure this import path is correct
-import 'home.dart'; // Ensure this import path is correct
+import 'package:chungdam/screens/home.dart'; // Ensure this import path is correct
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {

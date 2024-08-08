@@ -1,10 +1,10 @@
-import 'package:chungdam/screens/login.dart';
+import 'package:chungdam/screens/authentication/login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:chungdam/screens/home.dart';
-import 'package:chungdam/screens/registrationpage.dart';
+import 'package:chungdam/screens/authentication/registrationpage.dart';
 import 'package:chungdam/screens/cart_provider.dart';
 import 'package:chungdam/screens/firebase_fetcher.dart'; // Ensure this import path is correct
 import 'package:shared_preferences/shared_preferences.dart';
