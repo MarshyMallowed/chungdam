@@ -1,12 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:bcrypt/bcrypt.dart';
 
 class AuthService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
+  
+  
   Future<bool> loginUser({
     required String identifier, // Can be email or phone number
     required String password,
+    
   }) async {
     try {
       // Determine if identifier is an email or phone number
@@ -27,12 +30,12 @@ class AuthService {
       if (userSnapshot.docs.isNotEmpty) {
         final userData = userSnapshot.docs.first.data() as Map<String, dynamic>;
         final storedPassword = userData['password'];
-
-        if (storedPassword == password) {
+        bool isPasswordCorrect = BCrypt.checkpw(password, storedPassword);
+        if (!isPasswordCorrect) {
           // Login successful
-          return true;
-        } else {
           throw Exception('Password does not match');
+        } else {
+          return true;
         }
       } else {
         throw Exception('User does not exist');

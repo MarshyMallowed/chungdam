@@ -1,9 +1,10 @@
 // ignore_for_file: use_build_context_synchronously
-
+import 'package:chungdam/screens/authentication/registrationpage.dart';
 import 'package:flutter/material.dart';
 import 'login_authservice.dart'; // Ensure this import path is correct
 import 'package:chungdam/screens/home.dart'; // Ensure this import path is correct
 import 'package:shared_preferences/shared_preferences.dart';
+
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -159,6 +160,28 @@ class _LoginScreenState extends State<LoginScreen> {
                           color: Colors.black,
                           fontSize: 25,
                           fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 15,),
+                    ElevatedButton(
+                      onPressed: (){
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => RegistrationPage()),
+                          (Route<dynamic> route) => false,
+                        );
+                      }, //login
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF172A5A),
+                        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
+                      ),
+                      child: const Text(
+                        'Create an Account',
+                        style: TextStyle(
+                          color: Color.fromARGB(180, 255, 255, 255),
+                          fontSize: 18,
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
                     ),

@@ -6,6 +6,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:chungdam/screens/home.dart';
 import 'login.dart';
+import 'package:bcrypt/bcrypt.dart';
 
 class SignUpScreen extends StatefulWidget {
   final String phoneNumber;
@@ -22,10 +23,11 @@ class _SignUpScreen extends State<SignUpScreen> {
   final _passwordController = TextEditingController();
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final _formKey = GlobalKey<FormState>();
+  
 
   Future<String> _showCreatePasswordDialog() async {
     String password = '';
-
     await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -73,7 +75,7 @@ class _SignUpScreen extends State<SignUpScreen> {
 
     return query.docs.isEmpty; // Returns true if the phone number is not in the database
   }
-
+  
   Future<void> _signUpWithGoogle() async {
   try {
   // Trigger the Google Sign-In flow
@@ -157,19 +159,19 @@ class _SignUpScreen extends State<SignUpScreen> {
       });
     } else {
         String password = await _showCreatePasswordDialog();
-
+        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
         if (password.isNotEmpty) {
           await FirebaseFirestore.instance.collection('users').add({
             'firstName': firstName,
             'lastName': lastName,
             'name': googleDisplayName,
             'phoneNumber': widget.phoneNumber,
-            'password': password,
+            'password': hashedPassword,
             'createdAt': Timestamp.now(),
             'email': user.email,
             'googleUid': user.uid,
             'googleDisplayName': googleDisplayName,
-            'completeNumber': widget.phoneCNumber,
+              'completeNumber': widget.phoneCNumber,
           });
 
           ScaffoldMessenger.of(context).showSnackBar(
@@ -207,6 +209,7 @@ class _SignUpScreen extends State<SignUpScreen> {
     final name = '$firstName $lastName';
     final password = _passwordController.text;
 
+    String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
     try {
       // Check if the phone number is unique
       bool isUnique = await isPhoneNumberUnique(widget.phoneNumber);
@@ -225,7 +228,7 @@ class _SignUpScreen extends State<SignUpScreen> {
         'firstName': firstName,
         'lastName': lastName,
         'name': name,
-        'password': password,
+        'password': hashedPassword,
         'phoneNumber': widget.phoneNumber,
         'completeNumber': widget.phoneCNumber,
         'createdAt': Timestamp.now(), // Optional: Store the time of creation
@@ -346,65 +349,102 @@ class _SignUpScreen extends State<SignUpScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _firstNameController,
-                            decoration: InputDecoration(
-                              hintText: 'First Name',
-                              filled: true,
-                              fillColor: Colors.white,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8.0),
-                                borderSide: BorderSide.none,
+              Form(
+                key:_formKey,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: _firstNameController,
+                              decoration: InputDecoration(
+                                hintText: 'First Name',
+                                filled: true,
+                                fillColor: Colors.white,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  borderSide: BorderSide.none,
+                                ),
                               ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter your first name';
+                                }
+                                return null;
+                              },
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: TextField(
-                            controller: _lastNameController,
-                            decoration: InputDecoration(
-                              hintText: 'Last Name',
-                              filled: true,
-                              fillColor: Colors.white,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8.0),
-                                borderSide: BorderSide.none,
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: TextFormField(
+                              controller: _lastNameController,
+                              decoration: InputDecoration(
+                                hintText: 'Last Name',
+                                filled: true,
+                                fillColor: Colors.white,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  borderSide: BorderSide.none,
+                                ),
                               ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter your last name';
+                                }
+                                return null;
+                              },
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _passwordController,
-                      obscureText: true,
-                      decoration: InputDecoration(
-                        hintText: 'Password',
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide.none,
-                        ),
+                        ],
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          hintText: 'Password',
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter a password';
+                          }
+                          final regex = RegExp(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)[A-Za-z\d]{8,}$');
+                          if (!regex.hasMatch(value)) {
+                            return 'Password must be at least 8 characters, include an uppercase letter, a lowercase letter, and a number.';
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+              ),//Padding
+
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed:
-                  _submitData
-                ,
+                onPressed: () {
+                  if (_formKey.currentState?.validate() ?? false) {
+                    // Password meets all criteria
+                    _submitData();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Account Creation')),
+                    );
+                  } else {
+                    // If the form is not valid, show a message to the user
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Please fill in the required fields')),
+                    );
+                  }
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.yellow,
                   padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 10),
