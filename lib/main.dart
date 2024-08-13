@@ -1,4 +1,5 @@
 import 'package:chungdam/screens/authentication/login.dart';
+import 'package:chungdam/screens/blank_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -53,11 +54,11 @@ class AuthWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Listen to the authentication state
+    // Listen to the authentication state changes
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
-        // If the snapshot has data, the user is signed in
+        // If the user is signed in
         if (snapshot.hasData) {
           return FutureBuilder<Map<String, dynamic>?>(
             future: _firestoreService.getUserByPhoneNumber(snapshot.data!.phoneNumber!),
@@ -71,25 +72,22 @@ class AuthWrapper extends StatelessWidget {
               }
 
               if (!userSnapshot.hasData || userSnapshot.data == null) {
-                // If user data is not available, show the login page
+                // If no user data, navigate to LoginScreen
                 return const LoginScreen();
               }
 
-              // Extract user data
+              // User is authenticated and data is available, proceed to Home
               final userData = userSnapshot.data!;
               final phoneNumber = userData['phoneNumber'] ?? snapshot.data!.phoneNumber!;
-
-              // Navigate to the HomePage with fetched user data
-              return Home(
-                phoneNumber: phoneNumber,
-              );
+              return Home(phoneNumber: phoneNumber);
             },
           );
         } else {
-          // Otherwise, show the login page
+          // If not signed in, navigate to BlankPage or LoginScreen
           return const LoginScreen();
         }
       },
     );
   }
 }
+

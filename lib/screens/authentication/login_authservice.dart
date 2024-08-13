@@ -34,7 +34,7 @@ class AuthService {
         if (!isPasswordCorrect) {
           // Login successful
           throw Exception('Password does not match');
-        } else {
+        } else {  
           return true;
         }
       } else {
