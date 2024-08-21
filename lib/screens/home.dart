@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:chungdam/screens/navbot/home_page.dart';
 import 'package:chungdam/screens/drawerleft/personal_details_page.dart';
-import 'package:chungdam/screens/drawerleft/help_center_page.dart';
 import 'package:chungdam/screens/drawerleft/language_page.dart';
-import 'package:chungdam/screens/drawerleft/payment_method_page.dart';
 import 'package:chungdam/screens/drawerleft/vouchers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:chungdam/screens/helpcenter/help_center_page.dart';
 
 class Home extends StatefulWidget {
   final String phoneNumber;
@@ -64,12 +63,11 @@ Future<void> _fetchUserData() async {
         '/home': (context) => HomePage(firstName: firstName ?? 'No Name',
                 phoneNumber: widget.phoneNumber,),
         '/personal_details': (context) => PersonalDetailsPage(
-          firstName: firstName ?? 'No Name', 
-          lastName: lastName ?? 'No Name', 
+          firstName: firstName ?? 'Error', 
+          lastName: lastName ?? 'Error', 
           phoneNumber:widget.phoneNumber,
           ),
         '/vouchers': (context) => const VouchersPage(),
-        '/payment_method': (context) => const PaymentMethodPage(),
         '/language': (context) => const LanguagePage(),
         '/help_center': (context) => const HelpCenterPage(),
       },

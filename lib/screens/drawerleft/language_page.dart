@@ -8,116 +8,10 @@ class LanguagePage extends StatefulWidget {
 }
 
 class _LanguagePageState extends State<LanguagePage> {
-  // Extended list of languages in alphabetical order
+  // List of languages limited to English and Korean
   final List<String> languages = [
-    'Afrikaans',
-    'Albanian',
-    'Amharic',
-    'Arabic',
-    'Armenian',
-    'Azerbaijani',
-    'Basque',
-    'Belarusian',
-    'Bengali',
-    'Bosnian',
-    'Bulgarian',
-    'Burmese',
-    'Catalan',
-    'Cebuano',
-    'Chichewa',
-    'Chinese',
-    'Corsican',
-    'Croatian',
-    'Czech',
-    'Danish',
-    'Dutch',
     'English',
-    'Esperanto',
-    'Estonian',
-    'Filipino',
-    'Finnish',
-    'French',
-    'Frisian',
-    'Galician',
-    'Georgian',
-    'German',
-    'Greek',
-    'Gujarati',
-    'Haitian Creole',
-    'Hausa',
-    'Hawaiian',
-    'Hebrew',
-    'Hindi',
-    'Hmong',
-    'Hungarian',
-    'Icelandic',
-    'Igbo',
-    'Indonesian',
-    'Irish',
-    'Italian',
-    'Japanese',
-    'Javanese',
-    'Kannada',
-    'Kazakh',
-    'Khmer',
-    'Kinyarwanda',
-    'Korean',
-    'Kurdish',
-    'Kyrgyz',
-    'Lao',
-    'Latin',
-    'Latvian',
-    'Lithuanian',
-    'Luxembourgish',
-    'Macedonian',
-    'Malagasy',
-    'Malay',
-    'Malayalam',
-    'Maltese',
-    'Maori',
-    'Marathi',
-    'Mongolian',
-    'Nepali',
-    'Norwegian',
-    'Odia (Oriya)',
-    'Pashto',
-    'Persian',
-    'Polish',
-    'Portuguese',
-    'Punjabi',
-    'Romanian',
-    'Russian',
-    'Samoan',
-    'Scots Gaelic',
-    'Serbian',
-    'Sesotho',
-    'Shona',
-    'Sindhi',
-    'Sinhala',
-    'Slovak',
-    'Slovenian',
-    'Somali',
-    'Spanish',
-    'Sundanese',
-    'Swahili',
-    'Swedish',
-    'Tajik',
-    'Tamil',
-    'Tatar',
-    'Telugu',
-    'Thai',
-    'Turkish',
-    'Turkmen',
-    'Ukrainian',
-    'Urdu',
-    'Uyghur',
-    'Uzbek',
-    'Vietnamese',
-    'Welsh',
-    'Xhosa',
-    'Yiddish',
-    'Yoruba',
-    'Zulu'
+    'Korean'
   ];
 
   // Currently selected language
@@ -134,21 +28,37 @@ class _LanguagePageState extends State<LanguagePage> {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: ListView.builder(
+      body: ListView.separated(
         itemCount: languages.length,
+        separatorBuilder: (BuildContext context, int index) => Divider(
+          color: Colors.grey, // Color of the divider
+          thickness: 1.0, // Thickness of the divider
+          height: 1.0, // Height of the divider
+        ),
         itemBuilder: (BuildContext context, int index) {
           return ListTile(
-            title: Text(languages[index]),
+            title: Text(
+              languages[index],
+              style: TextStyle(
+                color: Colors.black, // Text remains black
+              ),
+            ),
             leading: Radio<String>(
               value: languages[index],
               groupValue: selectedLanguage,
+              activeColor: Color(0xFF0c2344), // Change radio button color to dark blue on selection
               onChanged: (String? value) {
                 setState(() {
                   selectedLanguage = value;
                 });
-                // Here you might handle the change in language, like saving to preferences
+                // Handle language selection change if needed
               },
             ),
+            onTap: () {
+              setState(() {
+                selectedLanguage = languages[index];
+              });
+            },
           );
         },
       ),

@@ -1,5 +1,4 @@
 import 'package:chungdam/screens/authentication/login.dart';
-import 'package:chungdam/screens/blank_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';

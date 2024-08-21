@@ -3,7 +3,7 @@ import 'package:chungdam/screens/logoutfunction.dart';
 import 'package:chungdam/screens/homepage/start.dart';
 import 'package:chungdam/screens/homepage/map.dart';
 import 'package:chungdam/screens/navbot/menu_page.dart';
-import 'package:chungdam/screens/blank_page.dart';
+import 'package:chungdam/screens/cart_page.dart';
 
 class HomePage extends StatefulWidget {
   final String firstName;
@@ -119,7 +119,7 @@ class HomePageState extends State<HomePage> {
             icon: const Icon(Icons.shopping_cart, color: Color(0xFFFAF7E8)),
             onPressed: () {
               Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const BlankPage()), // Navigate to the blank page
+                MaterialPageRoute(builder: (context) => const CartPage()), // Navigate to the blank page
               );
             },
           ),
@@ -203,7 +203,6 @@ class HomePageState extends State<HomePage> {
               children: <Widget>[
                 _buildDrawerItem(Icons.person, 'Personal Details', selectedItemColor, '/personal_details'),
                 _buildDrawerItem(Icons.card_giftcard, 'Vouchers', selectedItemColor, '/vouchers'),
-                _buildDrawerItem(Icons.payment, 'Payment Method', selectedItemColor, '/payment_method'),
                 _buildDrawerItem(Icons.language, 'Language', selectedItemColor, '/language'),
                 _buildDrawerItem(Icons.help_center, 'Help Center', selectedItemColor, '/help_center'),
               ],
