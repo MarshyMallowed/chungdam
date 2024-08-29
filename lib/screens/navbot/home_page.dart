@@ -98,12 +98,10 @@ class HomePageState extends State<HomePage> {
         backgroundColor: const Color(0xFF0c2344), // Dark blue color for AppBar
         title: _selectedIndex == 1
         ? const Text(
-          "CHUNG DAM",
-          style: TextStyle(
-            color: Color(0xFFFAF7E8),
-            fontSize: 25,
-            fontWeight: FontWeight.bold,
-          ),
+          "Select Branch",
+           style: TextStyle(
+            color: Color(0xFFFAF7E8)
+            )
         )
         : const SizedBox.shrink(), // Returns an empty widget
         leading: Builder(
@@ -271,7 +269,7 @@ Widget _buildBody(double marginValue, double paddingValue, double borderRadiusVa
     // Content for the Home page (when _selectedIndex is 0)
     return StartPage(marginValue: marginValue, paddingValue: paddingValue, borderColor: borderColor, borderRadiusValue: borderRadiusValue, thinBorderColor: thinBorderColor, containerBackgroundColor: containerBackgroundColor,);
   } else if (_selectedIndex == 1){
-      return const MenuPage();
+      return BranchSelectionPage();
   } else if (_selectedIndex == 2) {
       // Content for the Restaurant Locations page (when _selectedIndex is 2)
       return Map();

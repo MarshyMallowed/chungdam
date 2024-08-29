@@ -5,6 +5,8 @@ import 'package:chungdam/screens/drawerleft/language_page.dart';
 import 'package:chungdam/screens/drawerleft/vouchers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:chungdam/screens/helpcenter/help_center_page.dart';
+import 'package:chungdam/screens/checkout_page.dart';
+import 'package:chungdam/screens/order_status_page.dart';
 
 class Home extends StatefulWidget {
   final String phoneNumber;

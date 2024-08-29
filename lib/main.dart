@@ -8,8 +8,8 @@ import 'package:chungdam/screens/authentication/registrationpage.dart';
 import 'package:chungdam/screens/cart_provider.dart';
 import 'package:chungdam/screens/firebase_fetcher.dart'; // Ensure this import path is correct
 import 'package:shared_preferences/shared_preferences.dart';
-
-
+import 'package:chungdam/screens/authentication/signup.dart';
+import 'package:chungdam/screens/menu/branch_provider.dart';
 
 
 void main() async {
@@ -22,12 +22,18 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProvider(
+          create: (context) => CartProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => BranchProvider(),
+        ),
       ],
       child: MyApp(isRegistered: isRegistered),
     ),
   );
 }
+
 
 class MyApp extends StatelessWidget {
   final bool isRegistered;
@@ -41,7 +47,10 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: isRegistered ? AuthWrapper() : const RegistrationPage(), //Home(firstName: 'test', phoneNumber:)
+      home: SignUpScreen(
+            phoneCNumber: '01234567890',
+            phoneNumber: '+631234567890',
+          )//isRegistered ? AuthWrapper() : const RegistrationPage(), //Home(firstName: 'test', phoneNumber:)
     );
   }
 }
