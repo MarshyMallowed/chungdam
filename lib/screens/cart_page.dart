@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'cart_provider.dart'; // Import the CartProvider
 import 'checkout_page.dart';
-
+import 'package:chungdam/screens/menu/branch_provider.dart';
 class CartPage extends StatelessWidget {
   const CartPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    const branch = 'MALATE'; // Replace with the actual branch as needed
+    final branch = Provider.of<BranchProvider>(context).selectedBranch;
     final cartProvider = Provider.of<CartProvider>(context);
     final cartItems = cartProvider.getCart(branch);
 
@@ -98,7 +98,7 @@ class CartPage extends StatelessWidget {
               ),
               const SizedBox(height: 5),
               Text(
-                'P ${_calculateTotal(Provider.of<CartProvider>(context).getCart('MALATE')).toStringAsFixed(2)}',
+                'P ${_calculateTotal(Provider.of<CartProvider>(context).getCart('PARQAL')).toStringAsFixed(2)}',
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -223,7 +223,7 @@ class CartItem extends StatelessWidget {
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8.0),
-                        child: Image.asset(itemData.imagePath, fit: BoxFit.cover),
+                        child: Image.network(itemData.itemCartImage, fit: BoxFit.contain),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -248,12 +248,12 @@ class CartItem extends StatelessWidget {
                             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                           ),
                           Text(
-                            itemData.weight,
+                            itemData.weight.toString(),
                             style: const TextStyle(fontSize: 12, color: Colors.black54),
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            'P ${itemData.price.toStringAsFixed(2)}',
+                            'P ${itemData.price}',
                             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                           ),
                         ],

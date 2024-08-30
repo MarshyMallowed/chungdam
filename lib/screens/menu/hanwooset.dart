@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:chungdam/screens/cart_provider.dart';
 import 'package:chungdam/screens/cart_page.dart';
-
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:chungdam/screens/menu/branch_provider.dart';
 class MyeongphumPage extends StatefulWidget {
-  final int index;
+  final int index; // Assumes this is the branch or another identifier for filtering
 
   MyeongphumPage(this.index);
 
@@ -15,7 +15,11 @@ class MyeongphumPage extends StatefulWidget {
 
 class _MyeongphumPageState extends State<MyeongphumPage> {
   bool isFront = true; // Tracks whether the front image is displayed
-
+  List<MenuItem> menuItems = []; // List to hold menu items fetched from Firestore
+  @override
+  void initState() {
+    super.initState();
+  }
   void _toggleFirstImage() {
     setState(() {
       isFront = !isFront; // Toggles the image display state
@@ -24,6 +28,7 @@ class _MyeongphumPageState extends State<MyeongphumPage> {
 
   @override
   Widget build(BuildContext context) {
+  final branch = Provider.of<BranchProvider>(context).selectedBranch;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xFF0C2344), // Dark blue color for the app bar
@@ -35,8 +40,7 @@ class _MyeongphumPageState extends State<MyeongphumPage> {
           IconButton(
             icon: Icon(Icons.shopping_cart, color: Color(0xFFFAF7E8)), // Cream color for the cart icon
             onPressed: () {
-              // Navigate to cart page or show cart details
-              Navigator.push(context, MaterialPageRoute(builder: (context) => CartPage()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const CartPage()));
             },
           ),
         ],
@@ -60,35 +64,15 @@ class _MyeongphumPageState extends State<MyeongphumPage> {
                 mainAxisAlignment: MainAxisAlignment.start, // Adjust content to start of column
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  _buildImageWithButton(
-                    'assets/hanwoo/myeongphumseta.png',
-                    'assets/hanwoo/back.png',
-                    isFront,
-                    _toggleFirstImage,
-                  ),
                   SizedBox(height: 30),
+                  _buildButtonItems(branch),
                   _buildOutlinedText('1++ ALA CARTE'),
                   SizedBox(height: 25),
-                  buildGridView(context, [
-                    'shortribs.png',
-                    'skirtmeat.png',
-                    'topblade.png',
-                    'sirloin.png',
-                    'ribeye.png',
-                    'ribfinger.png',
-                    'outsideskirtmeat.png',
-                    'tenderloin.png',
-                  ]),
+                  _buildGridView(branch),
                   SizedBox(height: 50),
                   _buildOutlinedText('PREMIUM ALA CARTE'),
                   SizedBox(height: 25),
-                  buildGridView(context, [
-                    'ribeyep.png',
-                    'skirtmeatp.png',
-                    'hangingtopblade.png',
-                    'hangingsirloin.png',
-                    'hangingtender.png',
-                  ]),
+                  _buildGridView1(branch), // Same grid for premium items, you might want to differentiate
                 ],
               ),
             ),
@@ -101,7 +85,6 @@ class _MyeongphumPageState extends State<MyeongphumPage> {
   Widget _buildOutlinedText(String text) {
     return Stack(
       children: [
-        // Outline text
         Text(
           text,
           style: TextStyle(
@@ -113,7 +96,6 @@ class _MyeongphumPageState extends State<MyeongphumPage> {
               ..color = Color(0xFFFAF7E8), // Outline color
           ),
         ),
-        // Solid text
         Text(
           text,
           style: TextStyle(
@@ -125,64 +107,225 @@ class _MyeongphumPageState extends State<MyeongphumPage> {
       ],
     );
   }
+  Widget _buildButtonItems(branch) {
+    return FutureBuilder<QuerySnapshot>(
+      future: FirebaseFirestore.instance
+          .collection('items')
+          .where('branch', isEqualTo: branch)
+          .where('withButtons', isEqualTo:'true')
+          .get(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator()); // Show a loading indicator
+        }
 
-  Widget _buildImageWithButton(String imagePathFront, String imagePathBack, bool isFront, VoidCallback toggleImage) {
-    return Stack(
-      alignment: Alignment.topLeft,
-      children: <Widget>[
-        GestureDetector(
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return Center(child: Text('No items found'));
+        }
+
+        // Wrap ListView with Container or SizedBox to constrain its height
+        return Container(
+          height: 220, // Set a specific height or use MediaQuery to make it responsive
+          child: ListView(
+            children: snapshot.data!.docs.map((doc) {
+              // Extract data from the document
+              final data = doc.data() as Map<String, dynamic>;
+              final imagePathFront = data['imagePathFront'];
+              final imagePathBack = data['imagePathBack'];
+              final itemName = data['itemName'];
+              final price = data['price'];
+              final itemCartImage = data['itemCartImage'];
+              final itemId = data['itemId'];
+              final weight = data['weight'] as int;
+
+              return _buildImageWithButton(
+                imagePathFront,
+                imagePathBack,
+                true, // Assuming default isFront is true
+                () {
+                  _toggleFirstImage();
+                },
+                itemId,
+                itemName,
+                price,
+                itemCartImage,
+                weight,
+                branch
+              );
+            }).toList(),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildImageWithButton(
+  String imagePathFront,
+  String imagePathBack,
+  bool isFront,
+  VoidCallback toggleImage,
+  String itemId,
+  String itemName,
+  int price,
+  String itemCartImage,
+  int weight,
+  String branch,
+) {
+  return Stack(
+    alignment: Alignment.topLeft,
+    clipBehavior: Clip.none, // Allows the button to be positioned out of the box
+    children: [
+      Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.black54),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: GestureDetector(
           onTap: toggleImage,
-          child: Container(
-            margin: EdgeInsets.all(2), // Reduced margin for spacing
-            child: ClipRRect( // Clip it with borderRadius if needed
-              borderRadius: BorderRadius.circular(15),
-              child: Image.asset(
-                isFront ? imagePathFront : imagePathBack,
-                width: 330,
-                height: 250,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.network(
+              isFront ? imagePathFront : imagePathBack,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+      ),
+      Positioned(
+        top: -22, // Adjust this value to control the vertical positioning of the button
+        left: -18, // Adjust this value to control the horizontal positioning of the button
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            shape: CircleBorder(),
+            backgroundColor: Color(0xFF0C2344),
+            foregroundColor: Color(0xFFFAF7E8),
+            padding: EdgeInsets.zero,
+            minimumSize: Size(25, 25), // Adjusts the size of the button
+          ),
+          child: Icon(Icons.add, size: 16),
+          onPressed: () {
+            Provider.of<CartProvider>(context, listen: false).addToCart(
+              branch,
+              CartItemData(
+                itemId: itemId,
+                itemCartImage: itemCartImage,
+                itemName: itemName,
+                price: price,
+                weight: weight,
               ),
-            ),
-          ),
+            );
+            print('Added to cart: $itemName');
+          },
         ),
-        Positioned(
-          top: 10, // Adjust this value to control the vertical positioning of the button
-          left: -12, // Adjust this value to control the horizontal positioning of the button
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              shape: CircleBorder(),
-              backgroundColor: Color(0xFF0C2344), // Button background color
-              foregroundColor: Color(0xFFFAF7E8), // Icon color
-              padding: EdgeInsets.zero,
-              minimumSize: Size(25, 25), // Adjusts the size of the button
-            ),
-            child: Icon(Icons.add, size: 16),
-            onPressed: () {
-              // Use CartProvider to add item to the cart
-              Provider.of<CartProvider>(context, listen: false).addItem('myeongphumseta.png');
-              print('Add to cart');
-            },
-          ),
+      ),
+    ],
+  );
+}
+
+
+Widget _buildGridView(String branch) {
+  return FutureBuilder<QuerySnapshot>(
+    future: FirebaseFirestore.instance
+        .collection('items')
+        .where('branch', isEqualTo: branch)
+        .where('withButtons', isEqualTo: '1')
+        .get(),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return Center(child: CircularProgressIndicator()); // Show a loading indicator
+      }
+
+      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+        return Center(child: Text('No items found'));
+      }
+
+      final menuItems = snapshot.data!.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return MenuItem(
+          imagePathFront: data['imagePathFront'],
+          imagePathBack: data['imagePathBack'] ?? '0',
+          itemName: data['itemName'],
+          price: data['price'],
+          itemCartImage: data['itemCartImage'],
+          itemId: data['itemId'],
+          weight: data['weight'], // Include if needed
+          itemCategory: data['itemCategory'], // Include if needed
+        );
+      }).toList();
+
+      return GridView.builder(
+        shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: (1 / 1.2),
+          crossAxisSpacing: 20,
+          mainAxisSpacing: 20,
         ),
-      ],
-    );
-  }
+        itemCount: menuItems.length,
+        itemBuilder: (context, index) {
+          final item = menuItems[index];
+          return buildImageCard(context, item, branch);
+        },
+      );
+    },
+  );
+}
 
-  Widget buildGridView(BuildContext context, List<String> imageNames) {
-    return GridView.count(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      crossAxisCount: 2,
-      childAspectRatio: (1 / 1.2),
-      crossAxisSpacing: 20,
-      mainAxisSpacing: 20,
-      children: imageNames.map((imageName) => buildImageCard(context, imageName)).toList(),
-    );
-  }
 
-  Widget buildImageCard(BuildContext context, String imageName) {
+Widget _buildGridView1(String branch) {
+  return FutureBuilder<QuerySnapshot>(
+    future: FirebaseFirestore.instance
+        .collection('items')
+        .where('branch', isEqualTo: branch)
+        .where('withButtons', isEqualTo: '2')
+        .get(),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return Center(child: CircularProgressIndicator()); // Show a loading indicator
+      }
+
+      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+        return Center(child: Text('No items found'));
+      }
+
+      final menuItems = snapshot.data!.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return MenuItem(
+          imagePathFront: data['imagePathFront'],
+          imagePathBack: data['imagePathBack'] ?? '0',
+          itemName: data['itemName'],
+          price: data['price'],
+          itemCartImage: data['itemCartImage'],
+          itemId: data['itemId'],
+          weight: data['weight'], // Include if needed
+          itemCategory: data['itemCategory'], // Include if needed
+        );
+      }).toList();
+
+      return GridView.builder(
+        shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: (1 / 1.2),
+          crossAxisSpacing: 20,
+          mainAxisSpacing: 20,
+        ),
+        itemCount: menuItems.length,
+        itemBuilder: (context, index) {
+          final item = menuItems[index];
+          return buildImageCard(context, item, branch);
+        },
+      );
+    },
+  );
+}
+
+  Widget buildImageCard(BuildContext context, MenuItem item, String branch) {
     return Stack(
       alignment: Alignment.topLeft,
-      clipBehavior: Clip.none, // Allows the button to be positioned out of the box
+      clipBehavior: Clip.none,
       children: [
         Container(
           decoration: BoxDecoration(
@@ -191,12 +334,12 @@ class _MyeongphumPageState extends State<MyeongphumPage> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Image.asset('assets/hanwoo/$imageName', fit: BoxFit.cover),
+            child: Image.network(item.imagePathFront, fit: BoxFit.cover),
           ),
         ),
         Positioned(
-          top: -22, // Adjust this value to control the vertical positioning of the button
-          left: -18, // Adjust this value to control the horizontal positioning of the button
+          top: -22,
+          left: -18,
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
               shape: CircleBorder(),
@@ -207,9 +350,17 @@ class _MyeongphumPageState extends State<MyeongphumPage> {
             ),
             child: Icon(Icons.add, size: 16),
             onPressed: () {
-              // Use CartProvider to add item to the cart
-              Provider.of<CartProvider>(context, listen: false).addItem(imageName);
-              print('Add $imageName to cart');
+              Provider.of<CartProvider>(context, listen: false).addToCart(
+                branch,
+                CartItemData(
+                  itemId: item.itemId,
+                  itemCartImage: item.itemCartImage,
+                  itemName: item.itemName, // Or use a separate item name if available
+                  price: item.price,
+                  weight: item.weight,
+                ),
+              );
+              print('Added to cart: ${item.itemName}');
             },
           ),
         ),
@@ -217,6 +368,30 @@ class _MyeongphumPageState extends State<MyeongphumPage> {
     );
   }
 }
+
+class MenuItem {
+  final String imagePathFront;
+  final String imagePathBack;
+  final String itemName;
+  int price;
+  final String itemCartImage;
+  final String itemId;
+  int weight; // Optional
+  final String itemCategory; // Optional
+
+  MenuItem({
+    required this.imagePathFront,
+    required this.imagePathBack,
+    required this.itemName,
+    required this.price,
+    required this.itemCartImage,
+    required this.itemId,
+    required this.weight,
+    required this.itemCategory,
+  });
+}
+
+
 
 
 
@@ -251,7 +426,7 @@ class _MyeongphumPageState extends State<MyeongphumPage> {
             IconButton(
               icon: Icon(Icons.shopping_cart, color: Color(0xFFFAF7E8)), // Cream color for the cart icon
               onPressed: () {
-                // Implement cart action here
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const CartPage()));
                 print('Shopping cart tapped');
               },
             ),
@@ -452,7 +627,7 @@ class _MyeongphumPageState extends State<MyeongphumPage> {
             IconButton(
               icon: Icon(Icons.shopping_cart, color: Color(0xFFFAF7E8)), // Cream color for the cart icon
               onPressed: () {
-                // Implement cart action here
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const CartPage()));
                 print('Shopping cart tapped');
               },
             ),

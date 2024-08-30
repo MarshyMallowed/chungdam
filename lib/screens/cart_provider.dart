@@ -7,10 +7,12 @@ class CartProvider extends ChangeNotifier {
     'BGC': [],
   };
 
+  // Retrieves the cart items for the specified branch
   List<CartItemData> getCart(String branch) {
     return _carts[branch] ?? [];
   }
 
+  // Adds an item to the cart for the specified branch
   void addToCart(String branch, CartItemData item) {
     if (_carts.containsKey(branch)) {
       final cart = _carts[branch]!;
@@ -18,6 +20,9 @@ class CartProvider extends ChangeNotifier {
       if (existingItemIndex >= 0) {
         // Update quantity if item already exists
         cart[existingItemIndex].quantity += item.quantity;
+        if (cart[existingItemIndex].quantity <= 0) {
+          cart.removeAt(existingItemIndex);
+        }
       } else {
         // Add new item to cart
         cart.add(item);
@@ -26,6 +31,7 @@ class CartProvider extends ChangeNotifier {
     }
   }
 
+  // Removes an item from the cart for the specified branch
   void removeFromCart(String branch, CartItemData item) {
     if (_carts.containsKey(branch)) {
       final cart = _carts[branch]!;
@@ -36,43 +42,61 @@ class CartProvider extends ChangeNotifier {
       }
     }
   }
+
+  // Clears all items from the cart for the specified branch
+  void clearCart(String branch) {
+    if (_carts.containsKey(branch)) {
+      _carts[branch]!.clear();
+      notifyListeners();
+    }
+  }
 }
 
 class CartItemData {
-  final String titleLine1;
-  final String titleLine2;
-  final double price;
-  final String imagePath;
-  final String weight;
+  final String itemId;
+  final String itemCartImage;
+  final String itemName; // Original item name
+  int price; // Kept as String
+  int weight;
   int quantity;
+  late String titleLine1; // New field for the first line of the title
+  late String titleLine2; // New field for the second line of the title
 
   CartItemData({
-    required this.titleLine1,
-    required this.titleLine2,
+    required this.itemId,
+    required this.itemCartImage,
+    required this.itemName,
     required this.price,
-    required this.imagePath,
     required this.weight,
     this.quantity = 1,
-  });
+  }) {
+    // Manually separate itemName into titleLine1 and titleLine2
+    List<String> titleParts = itemName.split('|'); // Assuming '|' is the delimiter
+    titleLine1 = titleParts.isNotEmpty ? titleParts[0] : '';
+    titleLine2 = titleParts.length > 1 ? titleParts[1] : '';
+  }
 
-  double getTotalPrice() => price * quantity;
+  // Convert price from String to double and calculate total price
+  int getTotalPrice() {
+    return (price  * quantity);
+  }
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is CartItemData &&
           runtimeType == other.runtimeType &&
-          titleLine1 == other.titleLine1 &&
-          titleLine2 == other.titleLine2 &&
-          price == other.price &&
-          imagePath == other.imagePath &&
-          weight == other.weight;
+          itemId == other.itemId &&
+          itemName == other.itemName &&
+          price == other.price;
 
   @override
   int get hashCode =>
-      titleLine1.hashCode ^
-      titleLine2.hashCode ^
-      price.hashCode ^
-      imagePath.hashCode ^
-      weight.hashCode;
+      itemId.hashCode ^ itemName.hashCode ^ price.hashCode;
+
+  @override
+  String toString() {
+    return 'CartItemData(itemId: $itemId, itemName: $itemName, price: $price, quantity: $quantity)';
+  }
 }
+
